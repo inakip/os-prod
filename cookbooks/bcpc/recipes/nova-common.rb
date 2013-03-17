@@ -62,6 +62,7 @@ template "/etc/nova/nova.conf" do
     owner "nova"
     group "nova"
     mode 00600
+    variables( :servers => get_head_nodes )
 end
 
 template "/etc/nova/api-paste.ini" do

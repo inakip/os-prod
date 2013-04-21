@@ -1,5 +1,22 @@
---- extended_availability_zone.py.orig  2013-04-13 13:44:32.907312197 -0400
-+++ extended_availability_zone.py   2013-04-13 13:28:06.963294766 -0400
+diff -ru nova/api/ec2/ec2utils.py nova-new/api/ec2/ec2utils.py
+--- nova/api/ec2/ec2utils.py    2013-04-21 16:38:02.160288757 -0400
++++ nova-new/api/ec2/ec2utils.py    2013-04-21 16:42:39.764972496 -0400
+@@ -42,10 +42,10 @@
+         if not _CACHE:
+             _CACHE = memorycache.get_client()
+         key = "%s:%s" % (func.__name__, reqid)
+-        value = _CACHE.get(key)
++        value = _CACHE.get(key.encode('UTF-8'))
+         if value is None:
+             value = func(context, reqid)
+-            _CACHE.set(key, value, time=_CACHE_TIME)
++            _CACHE.set(key.encode('UTF-8'), value, time=_CACHE_TIME)
+         return value
+     return memoizer
+
+diff -ru nova/api/openstack/compute/contrib/extended_availability_zone.py nova-new/api/openstack/compute/contrib/extended_availability_zone.py
+--- nova/api/openstack/compute/contrib/extended_availability_zone.py    2013-04-21 16:39:10.365592284 -0400
++++ nova-new/api/openstack/compute/contrib/extended_availability_zone.py    2013-04-21 16:41:51.490998880 -0400
 @@ -41,11 +41,11 @@
          if not host:
              return None

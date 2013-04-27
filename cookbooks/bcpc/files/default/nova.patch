@@ -1,3 +1,15 @@
+--- nova/consoleauth/manager.py 2013-04-27 14:06:01.780134755 -0400
++++ nova-new/consoleauth/manager.py  2013-04-27 14:06:25.315368222 -0400
+@@ -118,7 +118,7 @@
+     def delete_tokens_for_instance(self, context, instance_uuid):
+         tokens = self._get_tokens_for_instance(instance_uuid)
+         for token in tokens:
+-            self.mc.delete(token)
++            self.mc.delete(token.encode('UTF-8'))
+         self.mc.delete(instance_uuid.encode('UTF-8'))
+ 
+     def get_backdoor_port(self, context):
+
 diff -ru nova/api/ec2/ec2utils.py nova-new/api/ec2/ec2utils.py
 --- nova/api/ec2/ec2utils.py    2013-04-21 16:38:02.160288757 -0400
 +++ nova-new/api/ec2/ec2utils.py    2013-04-21 16:42:39.764972496 -0400

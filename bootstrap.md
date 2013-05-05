@@ -57,13 +57,25 @@ Install notes:
 
 Login to new VM.
 
-If using NAT, port 22 inbound may be blocked; so, set up interface on eth0
-hostonlyif.  Add to /etc/network/interfaces on bcpc-bootstrap:
+If using NAT, port 22 inbound may be blocked; so, set up the other interfaces
+on the hostonlyif ifaces (eth0-2).  Add to /etc/network/interfaces on
+bcpc-bootstrap:
 
 ```
+# Static interfaces
 auto eth0
 iface eth0 inet static
   address 10.0.100.1
+  netmask 255.255.255.0
+
+auto eth1
+iface eth1 inet static
+  address 172.16.100.1
+  netmask 255.255.255.0
+
+auto eth2
+iface eth2 inet static
+  address 192.168.100.1
   netmask 255.255.255.0
 ```
 
@@ -149,6 +161,34 @@ At this point, you can then run:
 $ knife bootstrap -E Test-Laptop -r 'role[BCPC-Headnode]' 10.0.100.11
 $ knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.12
 $ knife bootstrap -E Test-Laptop -r 'role[BCPC-Worknode]' 10.0.100.12
+```
+
+Using BCPC
+==========
+
+If the VIP is configured against 10.0.100.5 (this is the default for the
+Test-Laptop environment), then you can go to ``https://10.0.100.5/horizon/`` to
+go to the OpenStack interface.  To find the OpenStack credentials, look in the
+data bag for your environment under ``keystone-admin-user`` and
+``keystone-admin-password``:
+
+```
+$ knife data bag show configs Test-Laptop | grep keystone-admin
+keystone-admin-password:       abcdefgh
+keystone-admin-token:          this-is-my-token
+keystone-admin-user:           admin
+
+```
+
+To check on ``Ceph``:
+
+```
+ubuntu@bcpc-vm1:~$ ceph -s
+   health HEALTH_OK
+   monmap e1: 1 mons at {bcpc-vm1=172.16.100.11:6789/0}, election epoch 2, quorum 0 bcpc-vm1
+   osdmap e94: 12 osds: 12 up, 12 in
+    pgmap v705: 2192 pgs: 2192 active+clean; 80333 KB data, 729 MB used, 227 GB / 227 GB avail
+   mdsmap e4: 1/1/1 up {0=bcpc-vm1=up:active}
 ```
 
 Manual setup notes

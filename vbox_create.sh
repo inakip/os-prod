@@ -23,24 +23,42 @@ if [ ! -f ubuntu-12.04-mini.iso ]; then
     curl -o ubuntu-12.04-mini.iso http://archive.ubuntu.com/ubuntu/dists/precise/main/installer-amd64/current/images/netboot/mini.iso
 fi
 
-# Make the three BCPC networks we'll need
-for i in 0 1 2 3 4 5 6 7 8 9; do
-    $VBM hostonlyif remove vboxnet$i || true
-done
-$VBM hostonlyif create
-$VBM hostonlyif create
-$VBM hostonlyif create
-$VBM dhcpserver remove --ifname vboxnet0 || true
-$VBM dhcpserver remove --ifname vboxnet1 || true
-$VBM dhcpserver remove --ifname vboxnet2 || true
-$VBM hostonlyif ipconfig vboxnet0 --ip 10.0.100.2 --netmask 255.255.255.0
-$VBM hostonlyif ipconfig vboxnet1 --ip 172.16.100.2 --netmask 255.255.255.0
-$VBM hostonlyif ipconfig vboxnet2 --ip 192.168.100.2 --netmask 255.255.255.0
+if ! hash $VBM ; then
+  echo "You do not appear to have $VBM from VirtualBox"
+  exit 1
+fi
 
-# Create bootstrap VM
-for vm in bcpc-bootstrap; do
+# Can we create the bootstrap VM via Vagrant
+if hash vagrant ; then
+  echo "Vagrant detected - using Vagrant to initialize bcpc-bootstrap"
+  echo "N.B. This may take approximately 30-45 minutes to complete."
+  if [ ! -f precise-server-cloudimg-amd64-vagrant-disk1.box ]; then
+    curl -o precise-server-cloudimg-amd64-vagrant-disk1.box http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box
+  fi
+  if [ ! -f insecure_private_key ]; then
+    cp $HOME/.vagrant.d/insecure_private_key .
+  fi
+  cp ../Vagrantfile .
+  vagrant up
+else
+  echo "Vagrant not detected - using raw VirtualBox for bcpc-bootstrap"
+  # Make the three BCPC networks we'll need
+  for i in 0 1 2 3 4 5 6 7 8 9; do
+    $VBM hostonlyif remove vboxnet$i || true
+  done
+  $VBM hostonlyif create
+  $VBM hostonlyif create
+  $VBM hostonlyif create
+  $VBM dhcpserver remove --ifname vboxnet0 || true
+  $VBM dhcpserver remove --ifname vboxnet1 || true
+  $VBM dhcpserver remove --ifname vboxnet2 || true
+  $VBM hostonlyif ipconfig vboxnet0 --ip 10.0.100.2 --netmask 255.255.255.0
+  $VBM hostonlyif ipconfig vboxnet1 --ip 172.16.100.2 --netmask 255.255.255.0
+  $VBM hostonlyif ipconfig vboxnet2 --ip 192.168.100.2 --netmask 255.255.255.0
+  # Create bootstrap VM
+  for vm in bcpc-bootstrap; do
     # Only if VM doesn't exist
-    if ! $VBM list vms | grep $vm ; then
+    if ! $VBM list vms | grep "^\"${vm}\"" ; then
         $VBM createvm --name $vm --ostype Ubuntu_64 --basefolder $P --register
         $VBM modifyvm $vm --memory 1024
         $VBM storagectl $vm --name "SATA Controller" --add sata
@@ -53,19 +71,21 @@ for vm in bcpc-bootstrap; do
             port=$((port+1))
         done
         # Add the network interfaces
-        $VBM modifyvm $vm --nic1 hostonly --hostonlyadapter1 vboxnet0
-        $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 vboxnet1
-        $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 vboxnet2
-        $VBM modifyvm $vm --nic4 nat
+        $VBM modifyvm $vm --nic1 nat
+        $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 vboxnet0
+        $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 vboxnet1
+        $VBM modifyvm $vm --nic4 hostonly --hostonlyadapter4 vboxnet2
         # Add the bootable mini ISO for installing Ubuntu 12.04
         $VBM storageattach $vm --storagectl "IDE Controller" --device 0 --port 0 --type dvddrive --medium ubuntu-12.04-mini.iso
+        $VBM modifyvm $vm --boot1 disk
     fi
-done
+  done
+fi
 
 # Create each VM
 for vm in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
     # Only if VM doesn't exist
-    if ! $VBM list vms | grep $vm ; then
+    if ! $VBM list vms | grep "^\"${vm}\"" ; then
         $VBM createvm --name $vm --ostype Ubuntu_64 --basefolder $P --register
         $VBM modifyvm $vm --memory 2048
         $VBM storagectl $vm --name "SATA Controller" --add sata
@@ -81,6 +101,7 @@ for vm in bcpc-vm1 bcpc-vm2 bcpc-vm3; do
         $VBM setextradata $vm VBoxInternal/Devices/pcbios/0/Config/LanBootRom $P/gpxe-1.0.1-80861004.rom
         $VBM modifyvm $vm --nic2 hostonly --hostonlyadapter2 vboxnet1
         $VBM modifyvm $vm --nic3 hostonly --hostonlyadapter3 vboxnet2
+        #$VBM modifyvm $vm --largepages on --vtxvpid on --hwvirtexexcl on
     fi
 done
 

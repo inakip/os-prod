@@ -93,6 +93,7 @@ package "fio"
 package "bc"
 package "htop"
 package "sysstat"
+package "acpid"
 
 # Remove spurious logging failures from this package
 package "powernap" do
@@ -142,6 +143,7 @@ bash "interface-mgmt-make-static-if-dhcp" do
         echo "  address #{node[:bcpc][:management][:ip]}" >> /etc/network/interfaces
         echo "  netmask #{node[:bcpc][:management][:netmask]}" >> /etc/network/interfaces
         echo "  gateway #{node[:bcpc][:management][:gateway]}" >> /etc/network/interfaces
+        echo "  dns-nameservers #{node[:bcpc][:dns_servers].join(' ')}" >> /etc/network/interfaces
         echo "  metric 100" >> /etc/network/interfaces
         ifup #{node[:bcpc][:management][:interface]}
     EOH
@@ -172,17 +174,16 @@ bash "interface-floating" do
         echo "  address #{node[:bcpc][:floating][:ip]}" >> /etc/network/interfaces
         echo "  netmask #{node[:bcpc][:floating][:netmask]}" >> /etc/network/interfaces
         echo "  gateway #{node[:bcpc][:floating][:gateway]}" >> /etc/network/interfaces
-        echo "  dns-nameservers #{node[:bcpc][:dns_servers].join(' ')}" >> /etc/network/interfaces
         echo "  metric 200" >> /etc/network/interfaces
         ifup #{node[:bcpc][:floating][:interface]}
     EOH
     not_if "ifquery --list | grep #{node[:bcpc][:floating][:interface]}"
 end
 
-bash "routing-management" do
+bash "routing-floating" do
     user "root"
-    code "echo '1 mgmt' >> /etc/iproute2/rt_tables"
-    not_if "grep -e '^1 mgmt' /etc/iproute2/rt_tables"
+    code "echo '1 floating' >> /etc/iproute2/rt_tables"
+    not_if "grep -e '^1 floating' /etc/iproute2/rt_tables"
 end
 
 bash "routing-storage" do
@@ -193,7 +194,7 @@ end
 
 template "/etc/network/if-up.d/bcpc-routing" do
     mode 00775
-    source "bcpc-routing.erb"
+    source "bcpc-routing-2.erb"
     notifies :run, "execute[run-routing-script-once]", :immediately
 end
 

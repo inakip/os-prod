@@ -101,6 +101,22 @@ bash "write-mds-#{node.hostname}-key" do
     not_if "test -f /var/lib/ceph/mds/ceph-#{node.hostname}/keyring"
 end
 
+bash "write-mon-#{node.hostname}-upstart" do
+    code <<-EOH
+        touch /var/lib/ceph/mon/ceph-#{node.hostname}/upstart
+        touch /var/lib/ceph/mon/ceph-#{node.hostname}/done
+    EOH
+    not_if "test -f /var/lib/ceph/mon/ceph-#{node.hostname}/done"
+end
+
+bash "write-mds-#{node.hostname}-upstart" do
+    code <<-EOH
+        touch /var/lib/ceph/mds/ceph-#{node.hostname}/upstart
+        touch /var/lib/ceph/mds/ceph-#{node.hostname}/done
+    EOH
+    not_if "test -f /var/lib/ceph/mds/ceph-#{node.hostname}/done"
+end
+
 execute "ceph-mds-start" do
     command "initctl emit ceph-mds id='#{node.hostname}'"
 end

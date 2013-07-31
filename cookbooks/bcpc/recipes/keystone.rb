@@ -75,7 +75,7 @@ ruby_block "keystone-database-creation" do
 end
 
 bash "keystone-database-sync" do
-    action :nothing
+    action :run
     user "root"
     code "keystone-manage db_sync"
     notifies :restart, "service[keystone]", :immediately
@@ -176,7 +176,7 @@ bash "keystone-service-catalog-swift" do
 end
 
 bash "keystone-service-catalog-quantum" do
-    action :nothing
+#    action :nothing
     user "root"
     code <<-EOH
         . /root/keystonerc

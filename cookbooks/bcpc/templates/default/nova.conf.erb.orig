@@ -16,13 +16,14 @@ rabbit_ha_queues=False
 rabbit_durable_queues=True
 
 # If using qpid...
-rpc_backend=nova.openstack.common.rpc.impl_kombu
+#rpc_backend=nova.openstack.common.rpc.impl_qpid
 #qpid_hostname=<%="#{node[:bcpc][:management][:vip]}"%>
 #qpid_username=admin
 #qpid_password=<%="#{get_config('rabbitmq-password')}"%>
 
 # Nova API settings
 auth_strategy=keystone
+api_paste_config=/etc/nova/api-paste.ini
 s3_host=<%="#{node[:bcpc][:management][:vip]}"%>
 ec2_listen=<%="#{node[:bcpc][:management][:ip]}"%>
 ec2_host=<%="#{node[:bcpc][:management][:ip]}"%>
@@ -30,13 +31,13 @@ osapi_compute_listen=<%="#{node[:bcpc][:management][:ip]}"%>
 metadata_listen=169.254.169.254
 metadata_host=169.254.169.254
 dmz_cidr=169.254.169.254/32
-enabled_apis=ec2,osapi_compute
+enabled_apis=ec2,osapi_compute,metadata
 
 # Nova Scheduler
 scheduler_driver=nova.scheduler.filter_scheduler.FilterScheduler
 
 # Nova Network settings
-#network_manager=nova.network.manager.VlanManager
+network_manager=nova.network.manager.VlanManager
 public_interface=<%="#{node[:bcpc][:floating][:interface]}"%>
 vlan_interface=<%="#{node[:bcpc][:fixed][:vlan_interface]}"%>
 vlan_start=<%="#{node[:bcpc][:fixed][:vlan_start]}"%>
@@ -72,8 +73,7 @@ volume_api_class=nova.volume.cinder.API
 always_use_volumes=True
 
 # Nova VNC settings
-#novnc_enabled=True
-vnc_enabled=True
+novnc_enabled=True
 novncproxy_base_url=http://<%="#{node[:bcpc][:management][:ip]}"%>:6080/vnc_auto.html
 vncserver_proxyclient_address=127.0.0.1
 novncproxy_host=<%="#{node[:bcpc][:management][:ip]}"%>
@@ -91,58 +91,12 @@ cnt_vpn_clients=5
 # Misc other settings
 logdir=/var/log/nova
 state_path=/var/lib/nova
-#lock_path=/var/lock/
-lock_path=/var/lib/nova
+lock_path=/var/lock/
 rootwrap_config=/etc/nova/rootwrap.conf
 verbose=True
-debug=True
+debug=False
 ec2_private_dns_show_ip=True
 #default_log_levels="amqplib=DEBUG,sqlalchemy=DEBUG,boto=WARN,suds=INFO,eventlet.wsgi.server=WARN"
 #rpc_response_timeout=120
 
-# Added for quantum
-firewall_driver = nova.virt.firewall.NoopFirewallDriver
-compute_driver = libvirt.LibvirtDriver
-service_quantum_metadata_proxy = True
-linuxnet_interface_driver =
-libvirt_vif_driver = nova.virt.libvirt.vif.LibvirtGenericVIFDriver
-security_group_api = quantum
-quantum_url = http://<%="#{node[:bcpc][:management][:vip]}"%>:9696
-quantum_admin_tenant_name = <%="#{node[:bcpc][:admin_tenant]}"%>
-quantum_auth_strategy = keystone
-quantum_admin_auth_url = http://<%="#{node[:bcpc][:management][:vip]}"%>:35357/v2.0
-quantum_admin_password = <%="#{get_config('keystone-admin-password')}"%>
-quantum_admin_username = admin
-network_api_class = nova.network.quantumv2.api.API
-
-ec2_dmz_host = <%="#{node[:bcpc][:management][:vip]}"%>
-vncserver_listen = 127.0.0.1
-
-xvpvncproxy_base_url = http://10.22.0.10:6081/console
-
-
-logging_context_format_string = %(asctime)s.%(msecs)03d %(levelname)s %(name)s [%(request_id)s %(user_name)s %(project_name)s] %(instance)s%(message)s
-use_syslog = True
-instances_path = /var/lib/nova/instances
-
-instance_name_template = instance-%08x
-
-libvirt_cpu_mode = none
-
-osapi_compute_extension = nova.api.openstack.compute.contrib.standard_extensions
-s3_port = 3333
-default_floating_pool = public
-force_dhcp_release = True
-
-compute_scheduler_driver = nova.scheduler.filter_scheduler.FilterScheduler
-allow_resize_to_same_host = True
-
-[spice]
-enabled = false
-html5proxy_base_url = http://10.22.0.10:6082/spice_auto.html
-
-
-# end of added for quantum
 # Auto-generated per-node settings below
-
-

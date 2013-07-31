@@ -1,5 +1,5 @@
 {
-    "name": "BCPC-Worknode",
+    "name": "BCPC-Worknode-noCeph",
     "default_attributes": {
     },
     "json_class": "Chef::Role",
@@ -8,7 +8,6 @@
       "recipe[bcpc::default]",
       "recipe[bcpc::networking]",
       "recipe[bcpc::ntp]",
-      "recipe[bcpc::ceph-work]",
       "recipe[bcpc::nova-work]",
       "recipe[bcpc::diamond]",
       "recipe[bcpc::beaver]",

@@ -21,8 +21,9 @@ default['bcpc']['domain_name'] = "bcpc.example.com"
 ###########################################
 default['bcpc']['ceph_disks'] = [ "sdb", "sdc", "sdd", "sde" ]
 default['bcpc']['management']['interface'] = "eth0"
-default['bcpc']['storage']['interface'] = "eth1"
-default['bcpc']['floating']['interface'] = "eth2"
+default['bcpc']['ext_access']['interface'] = "eth1"
+default['bcpc']['storage']['interface'] = "eth2"
+default['bcpc']['floating']['interface'] = "eth3"
 default['bcpc']['fixed']['vlan_interface'] = node[:bcpc][:floating][:interface]
 
 ###########################################
@@ -30,19 +31,20 @@ default['bcpc']['fixed']['vlan_interface'] = node[:bcpc][:floating][:interface]
 #  Network settings for the cluster
 #
 ###########################################
-default['bcpc']['management']['vip'] = "10.17.1.15"
+default['bcpc']['management']['vip'] = "10.22.0.10"
 default['bcpc']['management']['netmask'] = "255.255.255.0"
-default['bcpc']['management']['cidr'] = "10.17.1.0/24"
-default['bcpc']['management']['gateway'] = "10.17.1.1"
+default['bcpc']['management']['cidr'] = "10.22.0.0/24"
+default['bcpc']['management']['gateway'] = "10.22.0.1"
 
+default['bcpc']['storage']['vip'] = "10.22.1.10"
 default['bcpc']['storage']['netmask'] = "255.255.255.0"
-default['bcpc']['storage']['cidr'] = "100.100.0.0/24"
-default['bcpc']['storage']['gateway'] = "100.100.0.1"
+default['bcpc']['storage']['cidr'] = "10.22.1.0/24"
+default['bcpc']['storage']['gateway'] = "10.22.1.1"
 
 default['bcpc']['floating']['netmask'] = "255.255.255.0"
-default['bcpc']['floating']['cidr'] = "192.168.43.0/24"
-default['bcpc']['floating']['gateway'] = "192.168.43.2"
-default['bcpc']['floating']['available_subnet'] = "192.168.43.128/25"
+default['bcpc']['floating']['cidr'] = "10.22.2.0/24"
+default['bcpc']['floating']['gateway'] = "10.22.2.1"
+default['bcpc']['floating']['available_subnet'] = "10.22.2.128/25"
 
 default['bcpc']['fixed']['cidr'] = "1.127.0.0/16"
 default['bcpc']['fixed']['vlan_start'] = "1000"
@@ -76,6 +78,7 @@ default['bcpc']['keystone_dbname'] = "keystone"
 default['bcpc']['graphite_dbname'] = "graphite"
 default['bcpc']['pdns_dbname'] = "pdns"
 default['bcpc']['zabbix_dbname'] = "zabbix"
+default['bcpc']['quantum_dbname'] = "quantum"
 
 default['bcpc']['cinder_rbd_pool'] = "volumes"
 default['bcpc']['glance_rbd_pool'] = "images"

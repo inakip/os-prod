@@ -10,7 +10,7 @@
     public network = <%= @node["bcpc"]["storage"]["cidr"] %>
     cluster network = <%= @node["bcpc"]["storage"]["cidr"] %>
     keyring = /etc/ceph/$cluster.$name.keyring
-    mon host = <%= @servers.map{|s| s["bcpc"]["storage"]["ip"] + ":6789"}.join(', ') %>
+    mon host = <%= @node["bcpc"]["storage"]["vip"] + ":6789" %>
 
 [mon]
     keyring = /var/lib/ceph/mon/$cluster-$id/keyring

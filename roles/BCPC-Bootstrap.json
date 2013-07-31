@@ -6,8 +6,8 @@
     "run_list": [
       "role[Basic]",
       "recipe[bcpc::cobbler]",
-      "recipe[bcpc::ntp]",
-      "recipe[bcpc::ufw]"
+      "recipe[bcpc::ntp]"
+//      "recipe[bcpc::ufw]"
     ],
     "description": "A bootstrap node in a BCPC cluster",
     "chef_type": "role",
